@@ -1,0 +1,31 @@
+version: '3.3'
+
+services:
+   mdb:
+     image: mariadb
+     volumes:
+       - $ROOT/conf/db/mariadb.cnf:/etc/mysql/my.cnf
+       - $ROOT/container/db:/var/lib/mysql:cached
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: root
+       MYSQL_DATABASE: $DB_NAME
+       MYSQL_USER: $DB_USER
+       MYSQL_PASSWORD: $DB_PASSWORD
+     ports:
+       - $MYSQL_PORT:3306
+   wordpress:
+     depends_on:
+       - mdb
+     volumes:
+       - $ROOT/site:/var/www/html
+       - $ROOT/conf/wordpress/php.ini:/usr/local/etc/php/conf.d/uploads.ini
+     image: wordpress:php7.3
+     ports:
+       - $WORDPRES_PORT:80
+     restart: always
+     environment:
+       WORDPRESS_DB_HOST: mdb:3306
+       WORDPRESS_DB_USER: $DB_USER
+       WORDPRESS_DB_PASSWORD: $DB_PASSWORD
+       WORDPRESS_DB_NAME: $DB_NAME
